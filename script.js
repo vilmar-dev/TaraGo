@@ -10,7 +10,7 @@
 // admin powers (can remove other users' posts).
 // -----------------------------------------------------
 const ADMIN_EMAILS = [
-  "admin@example.com"
+  "ammasivilmar2@gmail.com"
   // add more admin emails here, comma-separated
 ];
 
