@@ -1,31 +1,17 @@
-// =====================================================
-// CAMPUS CARPOOL — APP LOGIC
-// Firebase Auth (email/password) + Realtime Database
-// =====================================================
-
-// -----------------------------------------------------
-// ADMIN CONFIG
-// Add the email address(es) of admin accounts here.
-// Any account logging in with one of these emails gets
-// admin powers (can remove other users' posts).
-// -----------------------------------------------------
+//Tangina nyo wla kayong makukuha dito bwakanang shit
 const ADMIN_EMAILS = [
   "ammasivilmar2@gmail.com"
-  // add more admin emails here, comma-separated
+ 
 ];
 
-// -----------------------------------------------------
-// STATE
-// -----------------------------------------------------
+
 let currentUser = null;
 let isAdmin = false;
-let allCommuters = {};      // live snapshot of commuters/ from RTDB
-let allUsers = {};          // live snapshot of users/ from RTDB (admin only)
-let currentView = "feed";   // "feed" | "matches"
+let allCommuters = {};      
+let allUsers = {};          
+let currentView = "feed";   
 
-// -----------------------------------------------------
-// DOM REFERENCES
-// -----------------------------------------------------
+
 const authPanel = document.getElementById("authPanel");
 const dashboard = document.getElementById("dashboard");
 const adminDashboard = document.getElementById("adminDashboard");
@@ -107,15 +93,13 @@ signupForm.addEventListener("submit", async (e) => {
       createdAt: Date.now(),
       banned: false
     });
-    // currentUser/dashboard will be set up by onAuthStateChanged
+ 
   } catch (err) {
     signupError.textContent = friendlyAuthError(err);
   }
 });
 
-// =====================================================
-// LOG IN
-// =====================================================
+
 loginForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   loginError.textContent = "";
@@ -130,11 +114,7 @@ loginForm.addEventListener("submit", async (e) => {
   }
 });
 
-// =====================================================
-// ADMIN LOG IN
-// Uses the same Firebase Auth sign-in, but only proceeds
-// to the Admin Dashboard if the email is in ADMIN_EMAILS.
-// =====================================================
+
 adminForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   adminError.textContent = "";
@@ -149,7 +129,7 @@ adminForm.addEventListener("submit", async (e) => {
 
   try {
     await auth.signInWithEmailAndPassword(email, password);
-    // onAuthStateChanged will detect ADMIN_EMAILS match and route to Admin Dashboard
+   
   } catch (err) {
     adminError.textContent = friendlyAuthError(err);
   }
@@ -167,9 +147,7 @@ function friendlyAuthError(err) {
   }
 }
 
-// =====================================================
-// AUTH STATE LISTENER — controls which screen is shown
-// =====================================================
+
 auth.onAuthStateChanged(async (user) => {
   currentUser = user;
 
@@ -188,7 +166,7 @@ auth.onAuthStateChanged(async (user) => {
   isAdmin = ADMIN_EMAILS.includes(user.email);
 
   if (isAdmin) {
-    // ----- ADMIN PATH -----
+ 
     authPanel.classList.add("hidden");
     bannedPanel.classList.add("hidden");
     dashboard.classList.add("hidden");
@@ -196,11 +174,11 @@ auth.onAuthStateChanged(async (user) => {
 
     renderAuthStatus();
     startUsersListener();
-    startCommutersListener(); // needed for "active commuter" counts + remove-post action
+    startCommutersListener(); 
     return;
   }
 
-  // ----- STUDENT PATH: check banned status first -----
+ 
   const userSnap = await db.ref("users/" + user.uid).once("value");
   const userRecord = userSnap.val();
 
@@ -236,9 +214,7 @@ function renderAuthStatus() {
   document.getElementById("logoutBtn").addEventListener("click", () => auth.signOut());
 }
 
-// =====================================================
-// LOCATION DROPDOWN "OTHER" TOGGLES
-// =====================================================
+
 pickupSelect.addEventListener("change", () => {
   pickupOther.classList.toggle("hidden", pickupSelect.value !== "Other");
 });
@@ -246,9 +222,7 @@ dropoffSelect.addEventListener("change", () => {
   dropoffOther.classList.toggle("hidden", dropoffSelect.value !== "Other");
 });
 
-// =====================================================
-// REALTIME DATABASE — LISTEN FOR ALL COMMUTERS
-// =====================================================
+
 let commutersRef = null;
 
 function startCommutersListener() {
@@ -270,9 +244,7 @@ function stopCommutersListener() {
   allCommuters = {};
 }
 
-// =====================================================
-// REALTIME DATABASE — LISTEN FOR ALL USERS (admin only)
-// =====================================================
+
 let usersRef = null;
 
 function startUsersListener() {
@@ -288,9 +260,7 @@ function stopUsersListener() {
   allUsers = {};
 }
 
-// =====================================================
-// POST COMMUTE PROFILE
-// =====================================================
+
 commuteForm.addEventListener("submit", async (e) => {
   e.preventDefault();
   formHint.textContent = "";
@@ -365,9 +335,7 @@ function setSelectOrOther(selectEl, otherEl, value) {
   }
 }
 
-// =====================================================
-// VIEW TAB SWITCHING (Live Feed / Match Suggestions)
-// =====================================================
+
 document.querySelectorAll(".view-tab").forEach(tab => {
   tab.addEventListener("click", () => {
     document.querySelectorAll(".view-tab").forEach(t => t.classList.remove("active"));
@@ -378,9 +346,7 @@ document.querySelectorAll(".view-tab").forEach(tab => {
   });
 });
 
-// =====================================================
-// FILTERS
-// =====================================================
+
 filterRoute.addEventListener("input", renderFeed);
 filterTime.addEventListener("change", renderFeed);
 
@@ -411,9 +377,7 @@ function passesFilters(c) {
   return true;
 }
 
-// =====================================================
-// RENDER: LIVE FEED
-// =====================================================
+
 function renderFeed() {
   const entries = Object.entries(allCommuters).filter(([uid, c]) => passesFilters(c));
 
@@ -429,11 +393,7 @@ function renderFeed() {
   attachCardHandlers(liveFeed);
 }
 
-// =====================================================
-// MATCHING LOGIC
-// "Match if: same/near pickup area, same dropoff, time within ±30 min"
-// Scored 0–100% based on how close the match is.
-// =====================================================
+
 function computeMatches() {
   if (!currentUser) return [];
   const me = allCommuters[currentUser.uid];
@@ -451,13 +411,13 @@ function computeMatches() {
     const timeDiff = (myTime !== null && theirTime !== null) ? Math.abs(myTime - theirTime) : Infinity;
     const withinTimeWindow = timeDiff <= 30;
 
-    if (!sameDropoff && !samePickup && !withinTimeWindow) continue; // no overlap at all
+    if (!sameDropoff && !samePickup && !withinTimeWindow) continue; 
 
-    // Score: dropoff match is most important, then pickup, then closeness in time
+    
     let score = 0;
     if (sameDropoff) score += 50;
     if (samePickup) score += 35;
-    if (withinTimeWindow) score += Math.max(0, 15 - Math.floor(timeDiff / 2)); // closer time = more points
+    if (withinTimeWindow) score += Math.max(0, 15 - Math.floor(timeDiff / 2)); 
 
     if (score === 0) continue;
 
@@ -487,11 +447,7 @@ function renderMatches() {
   attachCardHandlers(matchPanel);
 }
 
-// =====================================================
-// CARD RENDERING (shared by feed + matches)
-// Note: admin moderation now lives entirely in the Admin
-// Dashboard table, not on these student-facing cards.
-// =====================================================
+
 function renderCard(uid, c, matchScore = null) {
   const isMine = currentUser && uid === currentUser.uid;
 
@@ -538,9 +494,7 @@ function attachCardHandlers(container) {
   });
 }
 
-// =====================================================
-// CONTACT / COORDINATION MODAL
-// =====================================================
+
 function openContactModal(uid) {
   const c = allCommuters[uid];
   if (!c) return;
@@ -581,9 +535,7 @@ contactModal.addEventListener("click", (e) => {
   if (e.target === contactModal) contactModal.classList.add("hidden");
 });
 
-// =====================================================
-// ADMIN DASHBOARD
-// =====================================================
+
 adminSearch.addEventListener("input", renderAdminDashboard);
 
 function renderAdminDashboard() {
@@ -606,7 +558,7 @@ function renderAdminDashboard() {
     );
   }
 
-  // Newest signups first
+
   filtered.sort((a, b) => (b[1].createdAt || 0) - (a[1].createdAt || 0));
 
   if (filtered.length === 0) {
@@ -682,9 +634,7 @@ function showToast(message, isError = false) {
   }, 3000);
 }
 
-// =====================================================
-// UTILS
-// =====================================================
+
 function escapeHtml(str) {
   if (!str) return "";
   return str
