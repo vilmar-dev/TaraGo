@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TaraGo </title>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ===================== TOP BAR ===================== -->
+  <header class="topbar">
+    <div class="brand">
+      <div class="logo-slot" id="logoSlot">
+      <div class="logo-slot" id="logoSlot">
+  <img src="/img/logo.png" alt="TaraGo Logo" /></div>
+  
+        <span class="logo-placeholder">LOGO</span>
+      </div>
+      <div class="brand-text">
+        <h1>TaraGo</h1> 
+        <p>Commute Matcher</p>
+      </div>
+    </div>
+
+    <div class="topbar-status">
+      <span class="pill" id="availableRidersPill">🚗 Available Commuters Today: <strong id="riderCount">0</strong></span>
+    </div>
+
+    <div class="topbar-auth" id="authStatus">
+      <!-- filled dynamically by app.js -->
+    </div>
+  </header>
+
+  <!-- ===================== AUTH PANEL (shown when logged out) ===================== -->
+  <section id="authPanel" class="auth-panel">
+    <div class="auth-card">
+      <div class="auth-tabs">
+        <button class="auth-tab active" data-tab="login">Log In</button>
+        <button class="auth-tab" data-tab="signup">Sign Up</button>
+        <button class="auth-tab" data-tab="admin">Admin</button>
+      </div>
+
+      <form id="loginForm" class="auth-form active">
+        <label>Email</label>
+        <input type="email" id="loginEmail" placeholder="you@school.edu.ph" required />
+        <label>Password</label>
+        <input type="password" id="loginPassword" placeholder="••••••••" required />
+        <button type="submit" class="btn-primary">Log In</button>
+        <p class="auth-error" id="loginError"></p>
+      </form>
+
+      <form id="signupForm" class="auth-form">
+        <label>Display Name / Alias</label>
+        <input type="text" id="signupName" placeholder="e.g. John D." required />
+        <label>Email</label>
+        <input type="email" id="signupEmail" placeholder="you@school.edu.ph" required />
+        <label>Password</label>
+        <input type="password" id="signupPassword" placeholder="At least 6 characters" required minlength="6" />
+        <button type="submit" class="btn-primary">Create Account</button>
+        <p class="auth-error" id="signupError"></p>
+      </form>
+
+      <form id="adminForm" class="auth-form">
+        <label>Admin Email</label>
+        <input type="email" id="adminEmail" placeholder="admin@example.com" required />
+        <label>Password</label>
+        <input type="password" id="adminPassword" placeholder="••••••••" required />
+        <button type="submit" class="btn-primary btn-admin">Log In as Admin</button>
+        <p class="auth-error" id="adminError"></p>
+      </form>
+    </div>
+  </section>
+
+  <!-- ===================== BANNED NOTICE (shown if a banned account logs in) ===================== -->
+  <section id="bannedPanel" class="auth-panel hidden">
+    <div class="auth-card banned-card">
+      <h3>Account Disabled</h3>
+      <p>Your account has been removed from Campus Carpool by an administrator. You can no longer post or view commuter listings.</p>
+      <button class="btn-secondary" id="bannedLogoutBtn">Log Out</button>
+    </div>
+  </section>
+
+  <!-- ===================== ADMIN DASHBOARD (shown when admin logs in) ===================== -->
+  <main id="adminDashboard" class="admin-dashboard hidden">
+    <section class="panel admin-stats">
+      <div class="stat-card">
+        <span class="stat-number" id="statTotalUsers">0</span>
+        <span class="stat-label">Total Registered Users</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-number" id="statActiveCommuters">0</span>
+        <span class="stat-label">Active Commuter Posts</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-number" id="statBannedUsers">0</span>
+        <span class="stat-label">Banned Users</span>
+      </div>
+    </section>
+
+    <section class="panel admin-table-panel">
+      <div class="admin-table-header">
+        <h2>All Registered Users</h2>
+        <input type="text" id="adminSearch" placeholder="Search by name or email…" />
+      </div>
+      <div class="admin-table-wrap">
+        <table class="admin-table">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Joined</th>
+              <th>Status</th>
+              <th>Posted Commute?</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="adminUserTableBody">
+            <tr><td colspan="6" class="empty-state">Loading users…</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <!-- ===================== MAIN DASHBOARD (shown when logged in) ===================== -->
+  <main id="dashboard" class="dashboard hidden">
+
+    <!-- LEFT PANEL: Commute Profile Input -->
+    <section class="panel panel-left">
+      <h2>Your Commute Profile</h2>
+      <p class="panel-sub">Post your route so others can find and match with you.</p>
+
+      <form id="commuteForm" class="commute-form">
+        <label>Course / Year <span class="optional">(optional)</span></label>
+        <input type="text" id="courseYear" placeholder="e.g. BSIT 3rd Year" />
+
+        <label>Pickup Location</label>
+        <select id="pickupSelect">
+          <option value="">Select pickup area…</option>
+          <option value="Calamba">Calamba</option>
+          <option value="Los Baños">Los Baños</option>
+          <option value="Bay">Bay</option>
+          <option value="Santa Rosa">Santa Rosa</option>
+          <option value="Cabuyao">Cabuyao</option>
+          <option value="Biñan">Biñan</option>
+          <option value="San Pedro">San Pedro</option>
+          <option value="Other">Other (type below)</option>
+        </select>
+        <input type="text" id="pickupOther" class="other-input hidden" placeholder="Type your pickup area" />
+
+        <label>Drop-off Location</label>
+        <select id="dropoffSelect">
+          <option value="">Select drop-off…</option>
+          <option value="Campus Main Gate">Campus Main Gate</option>
+          <option value="Campus Library">Campus Library</option>
+          <option value="Dormitory Area">Dormitory Area</option>
+          <option value="Other">Other (type below)</option>
+        </select>
+        <input type="text" id="dropoffOther" class="other-input hidden" placeholder="Type your drop-off point" />
+
+        <label>Preferred Travel Time</label>
+        <input type="time" id="travelTime" required />
+
+        <label>Contact Info <span class="optional">(optional)</span></label>
+        <input type="text" id="contactInfo" placeholder="Messenger / phone number" />
+
+        <button type="submit" class="btn-primary">Post My Commute</button>
+        <p class="form-hint" id="formHint"></p>
+      </form>
+
+      <button id="removeMyPostBtn" class="btn-secondary hidden">Remove My Post</button>
+    </section>
+
+    <!-- CENTER/RIGHT PANEL: Live Feed + Matches -->
+    <section class="panel panel-right">
+
+      <div class="tabs-row">
+        <button class="view-tab active" data-view="feed">📡 Live Student List</button>
+        <button class="view-tab" data-view="matches">🤝 Match Suggestions</button>
+      </div>
+
+      <!-- Filters -->
+      <div class="filters" id="filters">
+        <input type="text" id="filterRoute" placeholder="Filter by pickup/drop-off…" />
+        <select id="filterTime">
+          <option value="">Any time</option>
+          <option value="morning">Morning (12am–11:59am)</option>
+          <option value="afternoon">Afternoon (12pm–5:59pm)</option>
+          <option value="evening">Evening (6pm–11:59pm)</option>
+        </select>
+      </div>
+
+      <!-- Live Feed View -->
+      <div id="feedView" class="view-content active">
+        <div id="liveFeed" class="card-grid">
+          <p class="empty-state">No commuters posted yet. Be the first!</p>
+        </div>
+      </div>
+
+      <!-- Match Suggestions View -->
+      <div id="matchesView" class="view-content">
+        <div id="matchPanel" class="card-grid">
+          <p class="empty-state">Post your commute profile to see your matches here.</p>
+        </div>
+      </div>
+
+    </section>
+  </main>
+
+  <!-- ===================== CONTACT / COORDINATION MODAL ===================== -->
+  <div id="contactModal" class="modal hidden">
+    <div class="modal-card">
+      <button class="modal-close" id="closeModal">&times;</button>
+      <h3 id="modalName">Name</h3>
+      <p id="modalRoute" class="modal-route"></p>
+      <p id="modalTime" class="modal-time"></p>
+      <div class="modal-contact" id="modalContact"></div>
+      <button class="btn-primary" id="requestJoinBtn">Request to Join Ride</button>
+      <p class="modal-note" id="modalNote"></p>
+    </div>
+  </div>
+
+  <!-- ===================== TOAST ===================== -->
+  <div id="toast" class="toast hidden"></div>
+
+  <!-- ===================== FIREBASE SDKS (compat, no build step needed) ===================== -->
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js"></script>
+
+  <script src="firebase-config.js"></script>
+  <script src="script.js"></script>
+</body>
+</html>
