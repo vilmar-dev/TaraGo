@@ -24,9 +24,18 @@
       </div>
     </div>
 
-    <div class="topbar-status">
+
+  <!--  <div class="topbar-status">
       <span class="pill" id="availableRidersPill">🚗 Available Commuters Today: <strong id="riderCount">0</strong></span>
-    </div>
+    </div>  -->
+
+   <div class="topbar-status">
+  <span class="pill" id="availableRidersPill">🚗 Available Commuters Today: <strong id="riderCount">0</strong></span>
+  <span class="pill pill-messages hidden" id="unreadPill">💬 Unread: <strong id="unreadCount">0</strong></span>
+</div>
+
+
+   
 
     <div class="topbar-auth" id="authStatus">
    
@@ -221,6 +230,28 @@
     </div>
   </div>
 
+
+
+
+
+<!-- ===================== Inupdate ko ===================== -->
+<div id="chatModal" class="modal hidden">
+  <div class="modal-card chat-card">
+    <button class="modal-close" id="closeChatModal">&times;</button>
+    <h3 id="chatWithName">Chat</h3>
+    <div class="chat-messages" id="chatMessages">
+      <p class="empty-state">No messages yet. Say hi!</p>
+    </div>
+    <form id="chatForm" class="chat-input-row">
+      <input type="text" id="chatInput" placeholder="Type a message…" autocomplete="off" />
+      <button type="submit" class="btn-primary chat-send-btn">Send</button>
+    </form>
+  </div>
+</div>
+
+
+
+ 
  
   <div id="toast" class="toast hidden"></div>
 
