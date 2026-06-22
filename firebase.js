@@ -13,7 +13,7 @@
 const firebaseConfig = {
   apiKey: "AIzaSyDKl444XUtu3GLzS4qtVoh50oCluj7CXsY",
   authDomain: "tarago-c7011.firebaseapp.com",
-  databaseURL: "https://tarago-c7011-default-rtdb.firebaseio.com",
+  databaseURL: "https://tarago-c7011-default-rtdb.asia-southeast1.firebasedatabase.app/",
   projectId: "tarago-c7011",
   storageBucket: "tarago-c7011.firebasestorage.app",
   messagingSenderId: "1021517695715",
