@@ -1,7 +1,8 @@
-//Tangina nyo wla kayong makukuha dito bwakanang shit
+// =====================================================
+// CAMPUS CARPOOL — APP LOGIC
+// =====================================================
 const ADMIN_EMAILS = [
   "ammasivilmar2@gmail.com"
- 
 ];
 
 
@@ -50,11 +51,6 @@ const filterTime = document.getElementById("filterTime");
 const contactModal = document.getElementById("contactModal");
 const closeModalBtn = document.getElementById("closeModal");
 
-
-//tinanggal
-//const toastEl = document.getElementById("toast");
-
-//pinalit para sa messaging function
 const chatModal = document.getElementById("chatModal");
 const closeChatModalBtn = document.getElementById("closeChatModal");
 const chatWithName = document.getElementById("chatWithName");
@@ -65,21 +61,6 @@ const unreadPill = document.getElementById("unreadPill");
 const unreadCountEl = document.getElementById("unreadCount");
 
 const toastEl = document.getElementById("toast");
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 document.querySelectorAll(".auth-tab").forEach(tab => {
@@ -111,8 +92,6 @@ signupForm.addEventListener("submit", async (e) => {
     const cred = await auth.createUserWithEmailAndPassword(email, password);
     await cred.user.updateProfile({ displayName: name });
 
-    // Record this signup in users/ so admins can see total registrations
-    // even for people who never post a commute.
     await db.ref("users/" + cred.user.uid).set({
       uid: cred.user.uid,
       name: name,
@@ -187,18 +166,13 @@ auth.onAuthStateChanged(async (user) => {
     authStatus.innerHTML = "";
     stopCommutersListener();
     stopUsersListener();
-
-
-
-    //added
-    stopUnreadListener();  //end
+    stopUnreadListener();
     return;
   }
 
   isAdmin = ADMIN_EMAILS.includes(user.email);
 
   if (isAdmin) {
- 
     authPanel.classList.add("hidden");
     bannedPanel.classList.add("hidden");
     dashboard.classList.add("hidden");
@@ -210,7 +184,6 @@ auth.onAuthStateChanged(async (user) => {
     return;
   }
 
- 
   const userSnap = await db.ref("users/" + user.uid).once("value");
   const userRecord = userSnap.val();
 
@@ -228,15 +201,10 @@ auth.onAuthStateChanged(async (user) => {
   bannedPanel.classList.add("hidden");
   dashboard.classList.remove("hidden");
 
-/*  renderAuthStatus();
-  startCommutersListener();
-  loadMyExistingPost(); */
-
-//added
   renderAuthStatus();
-startCommutersListener();
-startUnreadListener();
-loadMyExistingPost(); //end
+  startCommutersListener();
+  startUnreadListener();
+  loadMyExistingPost();
 });
 
 document.getElementById("bannedLogoutBtn").addEventListener("click", () => auth.signOut());
@@ -424,7 +392,6 @@ function renderFeed() {
     return;
   }
 
-  // Sort soonest-time first
   entries.sort((a, b) => (timeToMinutes(a[1].time) ?? 9999) - (timeToMinutes(b[1].time) ?? 9999));
 
   liveFeed.innerHTML = entries.map(([uid, c]) => renderCard(uid, c)).join("");
@@ -451,7 +418,6 @@ function computeMatches() {
 
     if (!sameDropoff && !samePickup && !withinTimeWindow) continue; 
 
-    
     let score = 0;
     if (sameDropoff) score += 50;
     if (samePickup) score += 35;
@@ -507,23 +473,11 @@ function renderCard(uid, c, matchScore = null) {
         <span class="route-dot end"></span>
         <span class="route-label">${escapeHtml(c.dropoff)}</span>
       </div>
-
-
-      
-    <div class="card-time">🕒 ${formatTime(c.time)}</div>
+      <div class="card-time">🕒 ${formatTime(c.time)}</div>
       ${!isMine ? `<button class="chat-icon-btn" data-chat-uid="${uid}" data-chat-name="${escapeHtml(c.name)}" title="Message ${escapeHtml(c.name)}">💬</button>` : ""}
     </div>
-
   `;
 }
-
-//pasok mo lng to sa `or backticks
-// <div class="card-time">🕒 ${formatTime(c.time)}</div>
-  //  </div>
-//end
-
-
-
 
 function formatTime(t) {
   if (!t) return "—";
@@ -533,27 +487,6 @@ function formatTime(t) {
   return `${hour12}:${String(m).padStart(2, "0")} ${period}`;
 }
 
-
-
-
- function attachCardHandlers(container) {
-  container.querySelectorAll(".commuter-card").forEach(card => {
-    card.addEventListener("click", () => openContactModal(card.dataset.uid));
-    card.addEventListener("keydown", (e) => {
-      if (e.key === "Enter" || e.key === " ") {
-        e.preventDefault();
-        openContactModal(card.dataset.uid);
-
-
-             }
-    });
-  });
-}
-
-
-
-
-//added function
 
 function attachCardHandlers(container) {
   container.querySelectorAll(".commuter-card").forEach(card => {
@@ -576,15 +509,6 @@ function attachCardHandlers(container) {
     });
   });
 }
-
-        
- 
-
-
-
-
-
-//end of function
 
 
 function openContactModal(uid) {
@@ -625,10 +549,9 @@ function openContactModal(uid) {
 closeModalBtn.addEventListener("click", () => contactModal.classList.add("hidden"));
 contactModal.addEventListener("click", (e) => {
   if (e.target === contactModal) contactModal.classList.add("hidden");
+});
 
-
-
-//added // =====================================================
+// =====================================================
 // MESSAGING / CHAT
 // =====================================================
 let activeChatId = null;
@@ -756,19 +679,6 @@ function stopUnreadListener() {
 }
 
 
-//end
-
-
-  
-});  //this is not included
-
-
-
-
-
-
-
-
 adminSearch.addEventListener("input", renderAdminDashboard);
 
 function renderAdminDashboard() {
@@ -790,7 +700,6 @@ function renderAdminDashboard() {
       (u.email || "").toLowerCase().includes(query)
     );
   }
-
 
   filtered.sort((a, b) => (b[1].createdAt || 0) - (a[1].createdAt || 0));
 
