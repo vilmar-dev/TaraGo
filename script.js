@@ -649,17 +649,27 @@ chatModal.addEventListener("click", (e) => {
   if (e.target === chatModal) closeChatModal();
 });
 
+let mostRecentUnreadPartnerUid = null;
+
 function startUnreadListener() {
   allUnreadChatsRef = db.ref("messages");
   allUnreadChatsRef.on("value", (snapshot) => {
     const allThreads = snapshot.val() || {};
     let unread = 0;
+    let mostRecentTimestamp = 0;
+    mostRecentUnreadPartnerUid = null;
 
     Object.entries(allThreads).forEach(([chatId, thread]) => {
       if (!chatId.includes(currentUser.uid)) return;
       const msgs = thread.messages || {};
       Object.values(msgs).forEach(m => {
-        if (m.senderUid !== currentUser.uid && !m.seen) unread++;
+        if (m.senderUid !== currentUser.uid && !m.seen) {
+          unread++;
+          if (m.timestamp > mostRecentTimestamp) {
+            mostRecentTimestamp = m.timestamp;
+            mostRecentUnreadPartnerUid = m.senderUid;
+          }
+        }
       });
     });
 
@@ -672,9 +682,17 @@ function startUnreadListener() {
   });
 }
 
+unreadPill.addEventListener("click", () => {
+  if (!mostRecentUnreadPartnerUid) return;
+  const partner = allCommuters[mostRecentUnreadPartnerUid];
+  const partnerName = partner ? partner.name : "Commuter";
+  openChatModal(mostRecentUnreadPartnerUid, partnerName);
+});
+
 function stopUnreadListener() {
   if (allUnreadChatsRef) allUnreadChatsRef.off();
   allUnreadChatsRef = null;
+  mostRecentUnreadPartnerUid = null;
   unreadPill.classList.add("hidden");
 }
 
