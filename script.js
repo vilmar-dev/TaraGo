@@ -50,11 +50,38 @@ const filterTime = document.getElementById("filterTime");
 const contactModal = document.getElementById("contactModal");
 const closeModalBtn = document.getElementById("closeModal");
 
+
+//tinanggal
+//const toastEl = document.getElementById("toast");
+
+//pinalit para sa messaging function
+const chatModal = document.getElementById("chatModal");
+const closeChatModalBtn = document.getElementById("closeChatModal");
+const chatWithName = document.getElementById("chatWithName");
+const chatMessagesEl = document.getElementById("chatMessages");
+const chatForm = document.getElementById("chatForm");
+const chatInput = document.getElementById("chatInput");
+const unreadPill = document.getElementById("unreadPill");
+const unreadCountEl = document.getElementById("unreadCount");
+
 const toastEl = document.getElementById("toast");
 
-// =====================================================
-// AUTH TAB SWITCHING (Login / Sign Up)
-// =====================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 document.querySelectorAll(".auth-tab").forEach(tab => {
   tab.addEventListener("click", () => {
     document.querySelectorAll(".auth-tab").forEach(t => t.classList.remove("active"));
@@ -160,6 +187,11 @@ auth.onAuthStateChanged(async (user) => {
     authStatus.innerHTML = "";
     stopCommutersListener();
     stopUsersListener();
+
+
+
+    //added
+    stopUnreadListener();  //end
     return;
   }
 
@@ -196,9 +228,15 @@ auth.onAuthStateChanged(async (user) => {
   bannedPanel.classList.add("hidden");
   dashboard.classList.remove("hidden");
 
-  renderAuthStatus();
+/*  renderAuthStatus();
   startCommutersListener();
-  loadMyExistingPost();
+  loadMyExistingPost(); */
+
+//added
+  renderAuthStatus();
+startCommutersListener();
+startUnreadListener();
+loadMyExistingPost(); //end
 });
 
 document.getElementById("bannedLogoutBtn").addEventListener("click", () => auth.signOut());
@@ -469,10 +507,24 @@ function renderCard(uid, c, matchScore = null) {
         <span class="route-dot end"></span>
         <span class="route-label">${escapeHtml(c.dropoff)}</span>
       </div>
-      <div class="card-time">🕒 ${formatTime(c.time)}</div>
+
+
+      
+    <div class="card-time">🕒 ${formatTime(c.time)}</div>
+      ${!isMine ? `<button class="chat-icon-btn" data-chat-uid="${uid}" data-chat-name="${escapeHtml(c.name)}" title="Message ${escapeHtml(c.name)}">💬</button>` : ""}
     </div>
   `;
 }
+  `;
+}
+
+//pasok mo lng to sa `or backticks
+// <div class="card-time">🕒 ${formatTime(c.time)}</div>
+  //  </div>
+//end
+
+
+
 
 function formatTime(t) {
   if (!t) return "—";
@@ -482,17 +534,58 @@ function formatTime(t) {
   return `${hour12}:${String(m).padStart(2, "0")} ${period}`;
 }
 
-function attachCardHandlers(container) {
+
+
+//removed function
+/* function attachCardHandlers(container) {
   container.querySelectorAll(".commuter-card").forEach(card => {
     card.addEventListener("click", () => openContactModal(card.dataset.uid));
     card.addEventListener("keydown", (e) => {
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
         openContactModal(card.dataset.uid);
-      }
+
+
+             }
     });
   });
 }
+*/
+
+
+
+//added function
+
+function attachCardHandlers(container) {
+  container.querySelectorAll(".commuter-card").forEach(card => {
+    card.addEventListener("click", (e) => {
+      if (e.target.closest(".chat-icon-btn")) return;
+      openContactModal(card.dataset.uid);
+    });
+    card.addEventListener("keydown", (e) => {
+      if ((e.key === "Enter" || e.key === " ") && !e.target.closest(".chat-icon-btn")) {
+        e.preventDefault();
+        openContactModal(card.dataset.uid);
+      }
+    });
+  });
+
+  container.querySelectorAll(".chat-icon-btn").forEach(btn => {
+    btn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      openChatModal(btn.dataset.chatUid, btn.dataset.chatName);
+    });
+  });
+}
+
+        
+ 
+
+
+
+
+
+//end of function
 
 
 function openContactModal(uid) {
@@ -533,7 +626,148 @@ function openContactModal(uid) {
 closeModalBtn.addEventListener("click", () => contactModal.classList.add("hidden"));
 contactModal.addEventListener("click", (e) => {
   if (e.target === contactModal) contactModal.classList.add("hidden");
+
+
+
+//added // =====================================================
+// MESSAGING / CHAT
+// =====================================================
+let activeChatId = null;
+let activeChatPartnerUid = null;
+let activeChatRef = null;
+let allUnreadChatsRef = null;
+
+function getChatId(uidA, uidB) {
+  return [uidA, uidB].sort().join("_");
+}
+
+function openChatModal(partnerUid, partnerName) {
+  if (!currentUser) return;
+  if (activeChatRef) activeChatRef.off();
+
+  activeChatPartnerUid = partnerUid;
+  activeChatId = getChatId(currentUser.uid, partnerUid);
+  chatWithName.textContent = partnerName;
+  chatMessagesEl.innerHTML = `<p class="empty-state">Loading messages…</p>`;
+  chatModal.classList.remove("hidden");
+  chatInput.value = "";
+  chatInput.focus();
+
+  activeChatRef = db.ref("messages/" + activeChatId + "/messages");
+  activeChatRef.on("value", (snapshot) => {
+    const data = snapshot.val() || {};
+    renderChatMessages(data);
+    markIncomingMessagesSeen(data);
+  });
+}
+
+function renderChatMessages(messages) {
+  const entries = Object.entries(messages).sort((a, b) => (a[1].timestamp || 0) - (b[1].timestamp || 0));
+
+  if (entries.length === 0) {
+    chatMessagesEl.innerHTML = `<p class="empty-state">No messages yet. Say hi!</p>`;
+    return;
+  }
+
+  chatMessagesEl.innerHTML = entries.map(([id, m]) => {
+    const isMine = m.senderUid === currentUser.uid;
+    const seenTick = isMine ? (m.seen ? `<span class="seen-tick seen">✓✓ Seen</span>` : `<span class="seen-tick">✓ Sent</span>`) : "";
+    return `
+      <div class="chat-bubble-row ${isMine ? "mine" : "theirs"}">
+        <div class="chat-bubble">
+          <span class="chat-bubble-text">${escapeHtml(m.text)}</span>
+          <span class="chat-bubble-time">${formatChatTimestamp(m.timestamp)} ${seenTick}</span>
+        </div>
+      </div>
+    `;
+  }).join("");
+
+  chatMessagesEl.scrollTop = chatMessagesEl.scrollHeight;
+}
+
+function formatChatTimestamp(ts) {
+  if (!ts) return "";
+  const d = new Date(ts);
+  return d.toLocaleTimeString([], { hour: "numeric", minute: "2-digit" });
+}
+
+function markIncomingMessagesSeen(messages) {
+  Object.entries(messages).forEach(([id, m]) => {
+    if (m.senderUid !== currentUser.uid && !m.seen) {
+      db.ref(`messages/${activeChatId}/messages/${id}/seen`).set(true);
+    }
+  });
+}
+
+chatForm.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const text = chatInput.value.trim();
+  if (!text || !activeChatId) return;
+
+  chatInput.value = "";
+
+  await db.ref("messages/" + activeChatId + "/messages").push({
+    senderUid: currentUser.uid,
+    text: text,
+    timestamp: Date.now(),
+    seen: false
+  });
 });
+
+function closeChatModal() {
+  if (activeChatRef) activeChatRef.off();
+  activeChatRef = null;
+  activeChatId = null;
+  activeChatPartnerUid = null;
+  chatModal.classList.add("hidden");
+}
+
+closeChatModalBtn.addEventListener("click", closeChatModal);
+chatModal.addEventListener("click", (e) => {
+  if (e.target === chatModal) closeChatModal();
+});
+
+function startUnreadListener() {
+  allUnreadChatsRef = db.ref("messages");
+  allUnreadChatsRef.on("value", (snapshot) => {
+    const allThreads = snapshot.val() || {};
+    let unread = 0;
+
+    Object.entries(allThreads).forEach(([chatId, thread]) => {
+      if (!chatId.includes(currentUser.uid)) return;
+      const msgs = thread.messages || {};
+      Object.values(msgs).forEach(m => {
+        if (m.senderUid !== currentUser.uid && !m.seen) unread++;
+      });
+    });
+
+    if (unread > 0) {
+      unreadPill.classList.remove("hidden");
+      unreadCountEl.textContent = unread;
+    } else {
+      unreadPill.classList.add("hidden");
+    }
+  });
+}
+
+function stopUnreadListener() {
+  if (allUnreadChatsRef) allUnreadChatsRef.off();
+  allUnreadChatsRef = null;
+  unreadPill.classList.add("hidden");
+}
+
+
+//end
+
+
+  
+});  //this is not included
+
+
+
+
+
+
 
 
 adminSearch.addEventListener("input", renderAdminDashboard);
