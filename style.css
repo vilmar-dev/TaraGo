@@ -734,6 +734,12 @@ select:focus-visible,
 .pill-messages {
   background: #fff0d6;
   color: #b3781f;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+.pill-messages:hover {
+  background: #ffe6b8;
+  transform: translateY(-1px);
 }
 .pill-messages strong { color: #8a5a12; }
 
