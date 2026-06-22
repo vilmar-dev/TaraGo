@@ -11,13 +11,13 @@
 // =====================================================
 
 const firebaseConfig = {
-  apiKey: "YOUR_API_KEY",
-  authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-  databaseURL: "https://YOUR_PROJECT_ID-default-rtdb.firebaseio.com",
-  projectId: "YOUR_PROJECT_ID",
-  storageBucket: "YOUR_PROJECT_ID.appspot.com",
-  messagingSenderId: "YOUR_SENDER_ID",
-  appId: "YOUR_APP_ID"
+  apiKey: "AIzaSyDKl444XUtu3GLzS4qtVoh50oCluj7CXsY",
+  authDomain: "tarago-c7011.firebaseapp.com",
+  databaseURL: "https://tarago-c7011-default-rtdb.firebaseio.com",
+  projectId: "tarago-c7011",
+  storageBucket: "tarago-c7011.firebasestorage.app",
+  messagingSenderId: "1021517695715",
+  appId: "1:1021517695715:web:b43c4dd0fe115c15b393d6"
 };
 
 // Initialize Firebase (compat SDK, loaded via <script> tags in index.html)
