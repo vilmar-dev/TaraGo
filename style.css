@@ -1,10 +1,8 @@
-
-
-
-  
-
-
-
+/* =====================================================
+   CAMPUS CARPOOL — STYLE SHEET
+   Theme: light blue / white, transit & safety feel
+   Signature motif: dotted "route line" dividers + match % rings
+   ===================================================== */
 
 :root {
   --sky:        #eaf4fc;
@@ -62,11 +60,11 @@ h1, h2, h3 { font-family: var(--font-display); margin: 0; }
   flex: 1;
 }
 
-/* Logo placeholder container — drop an <img> in here later */
-/*
+/* Logo container — drop your logo image inside the <div id="logoSlot"> in index.html */
 .logo-slot {
-  width: 48px;
-  height: 48px;
+  width: 52px;
+  height: 52px;
+  padding: 6px;
   border-radius: 12px;
   border: 1.5px dashed var(--blue);
   background: var(--sky);
@@ -77,16 +75,19 @@ h1, h2, h3 { font-family: var(--font-display); margin: 0; }
   overflow: hidden;
 }
 .logo-slot img {
-  width: 100%;
-  height: 100%;
+  max-width: 100%;
+  max-height: 100%;
+  width: auto;
+  height: auto;
   object-fit: contain;
+  display: block;
 }
 .logo-placeholder {
   font-size: 10px;
   font-weight: 700;
   letter-spacing: 0.06em;
   color: var(--blue);
-} */
+}
 
 .brand-text h1 {
   font-size: 18px;
@@ -729,32 +730,6 @@ select:focus-visible,
   * { transition: none !important; }
 }
 
-
-.logo-slot {
-  width: 70px;
-  height: 70px;
-  border-radius: 50%;
-  overflow: hidden;
-}
-
-.logo-slot img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
 /* ===================== MESSAGING / CHAT ===================== */
 .pill-messages {
   background: #fff0d6;
@@ -807,7 +782,9 @@ select:focus-visible,
   margin-bottom: 12px;
 }
 
-.chat-bubble-row { display: flex; }
+.chat-bubble-row {
+  display: flex;
+}
 .chat-bubble-row.mine { justify-content: flex-end; }
 .chat-bubble-row.theirs { justify-content: flex-start; }
 
@@ -842,7 +819,10 @@ select:focus-visible,
 }
 .seen-tick { font-size: 10px; }
 
-.chat-input-row { display: flex; gap: 8px; }
+.chat-input-row {
+  display: flex;
+  gap: 8px;
+}
 .chat-input-row input {
   flex: 1;
   border: 1.5px solid var(--line);
@@ -853,4 +833,8 @@ select:focus-visible,
   outline: none;
 }
 .chat-input-row input:focus { border-color: var(--blue); }
-.chat-send-btn { width: auto; border-radius: 999px; padding: 10px 20px; }
+.chat-send-btn {
+  width: auto;
+  border-radius: 999px;
+  padding: 10px 20px;
+}
