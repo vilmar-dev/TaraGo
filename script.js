@@ -513,8 +513,7 @@ function renderCard(uid, c, matchScore = null) {
     <div class="card-time">🕒 ${formatTime(c.time)}</div>
       ${!isMine ? `<button class="chat-icon-btn" data-chat-uid="${uid}" data-chat-name="${escapeHtml(c.name)}" title="Message ${escapeHtml(c.name)}">💬</button>` : ""}
     </div>
-  `;
-}
+
   `;
 }
 
@@ -536,8 +535,8 @@ function formatTime(t) {
 
 
 
-//removed function
-/* function attachCardHandlers(container) {
+
+ function attachCardHandlers(container) {
   container.querySelectorAll(".commuter-card").forEach(card => {
     card.addEventListener("click", () => openContactModal(card.dataset.uid));
     card.addEventListener("keydown", (e) => {
@@ -550,7 +549,7 @@ function formatTime(t) {
     });
   });
 }
-*/
+
 
 
 
