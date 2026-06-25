@@ -2,7 +2,9 @@
 // CAMPUS CARPOOL — APP LOGIC
 // =====================================================
 const ADMIN_EMAILS = [
-  "ammasivilmar2@gmail.com"
+  "ammasivilmar2@gmail.com",
+  "pajarojapogi@gmail.com"
+
 ];
 
 
